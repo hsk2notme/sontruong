@@ -1,0 +1,441 @@
+#include<bits/stdc++.h>
+#include <conio.h>
+using namespace std;
+/*
+name: ten
+age: tuoi
+month: thang cua ve dang ki
+sex: gioi tinh
+hk: hanh khach
+cccd: ma so ca nhan
+*/
+class Admin
+{
+private:
+    string username;
+    string password;
+public:
+    Admin(string user, string pass) : username(user), password(pass) {}
+    bool validate(const string& user, const string& pass)
+    {
+        return username == user && password == pass;
+    }
+};
+bool dang_nhap(Admin admins[], int numAdmins)
+{
+    string user, pass;
+    cout << "===== DANG NHAP TAI KHOAN QUAN LY =====" << endl;
+    cout << "Nhap ten dang nhap: ";
+    cin >> user;
+    cout << "Nhap mat khau: ";
+    pass = "";
+    char ch;
+    while ((ch = _getch()) != '\r') //dung de an password khi nhap
+    {
+        /*if (ch == '\b') //dau cach(space)
+        {
+            if (!pass.empty())
+            {
+                pass.pop_back();
+                cout << "\b \b";
+            }
+        }
+        else*/
+        {
+            pass += ch;
+            cout << '*';
+        }
+    }
+    cout << endl;
+    for (int i = 0; i < numAdmins; i++)
+    {
+        if (admins[i].validate(user, pass))
+        {
+            cout << "Dang nhap thanh cong!" << endl;
+            return true;
+        }
+    }
+    cout << "Sai ten dang nhap hoac mat khau!" << endl;
+    return false;
+}
+
+typedef struct hanhkhach
+{
+    string cccd;
+    string name;
+    string sex;
+    int month;
+    int age;
+    int type;
+};
+void xuat_file(hanhkhach hk[], int biendem)
+{
+    ofstream file("hanhkhach.csv");
+    if (file.is_open())
+    {
+
+        file << "ID,Ho va ten,Gioi tinh,Tuoi,Hang ve,Thang\n";
+
+        for (int i = 0; i < biendem; ++i)
+        {
+            if (!hk[i].cccd.empty())
+            {
+                file << hk[i].cccd << ","
+                     << hk[i].name << ","
+                     << hk[i].sex << ","
+                     << hk[i].age << ","
+                     << hk[i].type << ","
+                     << hk[i].month << "\n";
+            }
+        }
+        file.close();
+        cout << "Du lieu da duoc xuat ra file 'hanhkhach.csv'.\n";
+    }
+    else
+    {
+        cout << "Loi xuat file.\n";
+    }
+}
+void nhap_file(hanhkhach hk[], int& biendem)
+{
+    ifstream file("hanhkhach.csv");
+    string line;
+    if (file.is_open())
+    {
+        getline(file, line);
+        while (getline(file, line))
+        {
+            stringstream ss(line);
+            string cccd, name, sex, age_str, month_str, type_str;
+
+            getline(ss, cccd, ',');
+            getline(ss, name, ',');
+            getline(ss, sex, ',');
+            getline(ss, age_str, ',');
+            getline(ss, type_str, ',');
+            getline(ss, month_str, ',');
+
+
+            if (!cccd.empty())
+            {
+                hk[biendem].cccd = cccd;
+                hk[biendem].name = name;
+                hk[biendem].sex = sex[0];
+                hk[biendem].age = stoi(age_str);
+                hk[biendem].type = stoi(type_str);
+                hk[biendem].month = stoi(month_str);
+
+                biendem++;
+            }
+        }
+
+        file.close();
+        cout << "Du lieu da duoc nhap \n";
+    }
+    else
+    {
+        cout << "Khong the mo file.\n";
+    }
+}
+string maskID(const string& id)//ham dung de  *** id khach hang
+{
+    return string(id.size() - 4, '*') + id.substr(id.size() - 4);
+}
+int tim(struct hanhkhach hk[], string id,int biendem)//ham phu de ham trong ham
+{
+    int found =-1;
+    for (int i = 0; i < biendem; i++)
+    {
+        if (hk[i].cccd == id)
+        {
+            found = i;
+            break;
+        }
+    }
+    return found;
+}
+/*void xoa_du_lieu(struct hanhkhach hk[],int index)//clear du lieu
+{
+    hk[index].cccd ="";
+    hk[index].name ="";
+    hk[index].sex ="";
+    hk[index].age = 0;
+    hk[index].month = 0;
+    hk[index].type = 0;
+}*/
+void hien_thi()
+{
+    cout<<"==========================================="<<"\n";
+    cout<<"            Cong ty xe bus HUST"<<"\n";
+    cout<<"                   MENU "<<"\n";
+    cout<<"==========================================="<<"\n";
+    cout<<" 1. Dang ky hanh khach"<<"\n";
+    cout<<" 2. Xoa hanh khach"<<"\n";
+    cout<<" 3. Cap nhat thong tin hanh khach"<<"\n";
+    cout<<" 4. Danh sach hanh khach"<<"\n";
+    cout<<" 5. Tim kiem hanh khach"<<"\n";
+    cout<<" 6. Gia han ve thang"<<"\n";
+    cout<<" 0. Dung hoat dong"<<"\n";
+}
+void them(struct hanhkhach hk[], int& biendem)//ham nhap thong tin
+{
+again:
+    cout<<"Nhap so cccd: ";
+    cin>>hk[biendem].cccd;
+    if (hk[biendem].cccd.length() != 12)
+    {
+        cout << "ID phai co dung 12 ky tu! Vui long nhap lai.\n";
+        goto again;
+    }
+//kiem tra trung thong tin
+    if(tim(hk,hk[biendem].cccd,biendem)!=-1)
+    {
+        cout<<"So cccd nay da duoc dang ky!\n";
+        goto again;
+    }
+//nhap thong tin
+    cout<<"Nhap ten hanh khach: ";
+    cin.ignore();//code de nhap ten co cach
+    getline(cin, hk[biendem].name);
+    cout<<"Nhap gioi tinh cua hanh khach (F hoac M): ";
+    cin>>hk[biendem].sex;
+    cout<<"Nhap tuoi cua hanh khach: ";
+    cin>>hk[biendem].age;
+    cout<<"Nhap thang muon dang ky ve: ";
+    cin>>hk[biendem].month;
+    cout<<"Nhap hang ve muon dang ky(1: lien tuyen, 0: co dinh): ";
+    cin>>hk[biendem].type;
+    switch(hk[biendem].type)
+    {
+    case 1:
+        cout<<"Cua ban het 140.000! \n";
+        break;
+    case 0:
+        cout<<"Cua ban het 80.000! \n";
+        break;
+    default:
+        cout<<"Sai gia tri! \n";
+    }
+    ++biendem;
+}
+
+void danhsach(struct hanhkhach hk[], int biendem) //Hien thi bang thong tin khach hang
+{
+    int i=0;
+    cout<<left<<setw(14)<<"ID"<<setw(30)<<"Ho va ten"<<setw(12)<<"Gioi tinh"<<setw(7)<<"Tuoi"<<setw(9)<<"Hang ve"<<setw(7)<<"Thang"<<"\n";
+    cout<<"=============================================================================\n";
+    while(i<=biendem)
+    {
+        if(hk[i].cccd!="")
+        {
+            cout<<left<<setw(14)<<maskID(hk[i].cccd) <<setw(30)<<hk[i].name<<setw(12)
+                <<hk[i].sex;
+            cout<<setw(7)<<hk[i].age<<setw(9)<<hk[i].type<<setw(7)<<hk[i].month;
+            cout<<"\n";
+        }
+        i=i+1;
+    }
+}
+void xoa(struct hanhkhach hk[], int& biendem)//xoa khach hang
+{
+    string id;
+    int index;
+    if (biendem > 0)
+    {
+        cout<<"Nhap ID cua khach hang:";
+        cin>>id;
+        index = tim(hk, id,biendem);
+
+        if (index!=-1)
+        {
+            if (index == (biendem-1)) //xoa ban ghi cuoi cung
+            {
+                hk[index].cccd ="";
+    hk[index].name ="";
+    hk[index].sex ="";
+    hk[index].age = 0;
+    hk[index].month = 0;
+    hk[index].type = 0;
+                --biendem;
+                cout<<"Khach hang da duoc xoa.\n";
+            }
+            else //xoa ban ghi dau tien hoac o giua
+            {
+                for (int i = index; i < biendem-1; i++)
+                {
+                    hk[i] = hk[i + 1];
+                }
+                hk[index].cccd ="";
+    hk[index].name ="";
+    hk[index].sex ="";
+    hk[index].age = 0;
+    hk[index].month = 0;
+    hk[index].type = 0;
+                --biendem ;
+                cout<<"Khach hang da duoc xoa.\n";
+
+            }
+
+        }
+        else cout<<"Khach hang khong ton tai. Kiem tra ID va thu lai.\n";
+
+    }
+    else cout<<"Khong co khach hang nao bi xoa\n";
+}
+void cap_nhat(struct hanhkhach hk[],int biendem) //Chinh sua thong tin khach hang
+{
+    string id;
+    int column_index;
+    cout<<"Nhap ID cua hanh khach: ";
+    cin>>id;
+    cout<<"1. Ho va ten\n";
+    cout<<"2. Gioi tinh\n";
+    cout<<"3. Tuoi\n";
+    cout<<"4. Hang ve\n";
+    cout<<"Muc muon cap nhat : ";
+    cin>>column_index;
+
+    int index = tim(hk, id,biendem);
+
+    if (index != -1)
+    {
+        switch (column_index)
+        {
+        case 1:
+            cout << "Nhap ten hanh khach: ";
+            cin.ignore();
+            getline(cin, hk[index].name);
+            break;
+        case 2:
+            cout << "Nhap gioi tinh (F hoac M): ";
+            cin >> hk[index].sex;
+            break;
+        case 3:
+            cout << "Nhap tuoi: ";
+            cin >> hk[index].age;
+            break;
+        case 4:
+            cout << "Nhap hang ve (1: lien tuyen, 0: co dinh): ";
+            cin >> hk[index].type;
+            break;
+        default:
+            cout << "Chuc nang khong ton tai!\n";
+            break;
+        }
+    }
+    else cout<<"Khach hang khong ton tai! Kiem tra ID va thu lai.";
+}
+
+void giahan(struct hanhkhach hk[], int biendem)
+{
+    string id;
+    int thang_them;
+
+    cout << "Nhap ID cua hanh khach: ";
+    cin >> id;
+
+    int index = tim(hk, id, biendem);
+    if (index != -1)
+    {
+        cout << "Nhap so thang muon gia han: ";
+        cin >> thang_them;
+
+        if (thang_them > 0)
+        {
+            hk[index].month += thang_them;
+            if (hk[index].month > 12)
+            {
+                hk[index].month -= 12;
+                cout << "Ve cua hanh khach da duoc gia han den thang " << hk[index].month << " nam sau.\n";
+            }
+            else
+            {
+                cout << "Ve cua hanh khach da duoc gia han den thang " << hk[index].month << ".\n";
+            }
+        }
+        else
+        {
+            cout << "So thang gia han phai lon hon 0.\n";
+        }
+    }
+    else
+    {
+        cout << "Khach hang khong ton tai vui long kiem tra lai.\n";
+    }
+}
+void tim_kiem(struct hanhkhach hk[], int biendem)
+{
+    string id;
+    cout<<"Nhap ID cua khach hang: ";
+    cin>>id;
+    int index=tim(hk,id,biendem);
+    if (index != -1)
+    {
+        //Hien thi thong tin khach hang
+        cout<<left<<setw(14)<<hk[index].cccd<<setw(30)<<hk[index].name<<setw(12)
+            <<hk[index].sex;
+        cout<<setw(7)<<hk[index].age<<setw(9)<<hk[index].type<<setw(7)<<hk[index].month;
+        cout<<"\n";
+    }
+    else cout<<"Hanh khach khong ton tai.";
+}
+int main()
+{
+    const int numAdmins = 3;
+    Admin admins[numAdmins] =
+    {
+        Admin("admin1", "password1"),
+        Admin("admin2", "password2"),
+        Admin("admin3", "password3")
+    };
+
+    if (!dang_nhap(admins, numAdmins))
+    {
+        cout << "Quyen truy cap bi tu choi!" << endl;
+        return 0;
+    }
+    hanhkhach hk[80];
+    int biendem = 0;
+    hien_thi(); // hien thi menu
+    int luachon;
+
+    nhap_file(hk, biendem);//nhap file excel da duoc tao tu truoc
+
+    do
+    {
+        cout << "\nNhap lua chon cua ban (0-6): ";
+        cin >> luachon;
+        if (luachon < 0 || luachon > 6)
+        {
+            cout << "Lua chon khong hop le! Vui long nhap lai.\n";
+            continue;
+        }
+        switch (luachon)
+        {
+        case 1:
+            them(hk, biendem);
+            break;
+        case 2:
+            xoa(hk, biendem);
+            break;
+        case 3:
+            cap_nhat(hk, biendem);
+            break;
+        case 4:
+            danhsach(hk, biendem);
+            break;
+        case 5:
+            tim_kiem(hk, biendem);
+            break;
+        case 6:
+            giahan(hk, biendem);
+            break;
+        case 0:
+            xuat_file(hk, biendem);
+            return 0;
+        }
+    }
+    while (true);
+
+    return 0;
+}
